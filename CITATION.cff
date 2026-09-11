@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+title: "Elite Zaki: Autonomous Edge-AI Security Drone Research Platform"
+message: "If you use or reference Elite Zaki in your research, please cite this project."
+type: software
+
+authors:
+  - family-names: "Gambo"
+    given-names: "Umar"
+    affiliation: "University of the People"
+
+version: "0.1.0"
+date-released: "2026-09-11"
+
+repository-code: "UmarGamboMaiduguri/elite-zaki-autonomous-drone"
+
+abstract: >
+  Elite Zaki is an autonomous edge-AI security drone research platform
+  exploring computer vision, thermal perception, autonomous navigation,
+  sensor fusion, edge computing, and cyber-secure telemetry.
+
+keywords:
+  - artificial intelligence
+  - robotics
+  - computer vision
+  - edge AI
+  - autonomous systems
+  - cybersecurity
+  - machine learning
+  - UAV
+  - drone
+  - sensor fusion
+
+license: MI
