@@ -1,8 +1,15 @@
 """
-Elite Zaki
+Elite Zaki Networking Engine.
 
-Autonomous Edge-AI Security Drone Research Platform.
+Provides the foundation for secure telemetry,
+authentication, and communication research.
 """
 
+from .receiver import SecureTelemetryReceiver, TelemetryReceiveResult
+
 __version__ = "0.1.0"
-__author__ = "Umar Gambo"
+
+__all__ = [
+    "SecureTelemetryReceiver",
+    "TelemetryReceiveResult",
+]
