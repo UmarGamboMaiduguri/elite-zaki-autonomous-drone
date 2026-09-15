@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "elite-zaki"
+version = "0.1.0"
+description = "Autonomous Edge-AI Security Drone Research Platform"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+
+dependencies = [
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "opencv-python",
+    "matplotlib",
+    "pytest",
+    "python-dotenv",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
