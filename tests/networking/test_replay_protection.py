@@ -61,3 +61,22 @@ def test_custom_max_age() -> None:
     )
 
     assert protection.is_fresh(timestamp)
+    def test_duplicate_message_is_detected() -> None:
+    """A previously seen message ID should be detected."""
+
+    protection = ReplayProtection()
+
+    assert not protection.is_replayed("message-001")
+    assert protection.is_replayed("message-001")
+
+
+def test_empty_message_id_is_rejected() -> None:
+    """An empty message ID should be rejected."""
+
+    protection = ReplayProtection()
+
+    try:
+        protection.is_replayed("")
+        assert False
+    except ValueError:
+        assert True
