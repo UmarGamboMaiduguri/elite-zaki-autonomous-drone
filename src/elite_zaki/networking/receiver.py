@@ -52,7 +52,8 @@ class SecureTelemetryReceiver:
         1. Verify message signature.
         2. Deserialize telemetry payload.
         3. Check timestamp freshness.
-        4. Accept or reject the message.
+        4. Check for duplicate message.
+        5. Accept or reject the message.
         """
 
         if not verify_secure_message(
@@ -83,6 +84,17 @@ class SecureTelemetryReceiver:
                 accepted=False,
                 packet=None,
                 reason="Telemetry timestamp is not fresh.",
+            )
+
+        message_id = message.signature
+
+        if self._replay_protection.is_replayed(
+            message_id,
+        ):
+            return TelemetryReceiveResult(
+                accepted=False,
+                packet=None,
+                reason="Duplicate telemetry message.",
             )
 
         return TelemetryReceiveResult(
