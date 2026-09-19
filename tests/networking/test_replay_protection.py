@@ -61,7 +61,9 @@ def test_custom_max_age() -> None:
     )
 
     assert protection.is_fresh(timestamp)
-    def test_duplicate_message_is_detected() -> None:
+
+
+def test_duplicate_message_is_detected() -> None:
     """A previously seen message ID should be detected."""
 
     protection = ReplayProtection()
