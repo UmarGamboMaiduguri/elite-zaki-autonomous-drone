@@ -104,3 +104,28 @@ def test_receiver_rejects_empty_secret_key() -> None:
         assert False
     except ValueError:
         assert True
+
+
+def test_receiver_rejects_duplicate_message() -> None:
+    """The receiver should reject the same message when received twice."""
+
+    packet = create_test_packet()
+
+    message = create_secure_message(
+        packet,
+        "test-secret-key",
+    )
+
+    receiver = SecureTelemetryReceiver(
+        "test-secret-key",
+    )
+
+    first_result = receiver.receive(message)
+    second_result = receiver.receive(message)
+
+    assert first_result.accepted
+    assert first_result.reason == "Telemetry accepted."
+
+    assert not second_result.accepted
+    assert second_result.packet is None
+    assert second_result.reason == "Duplicate telemetry message."
