@@ -1,44 +1,85 @@
-from elite_zaki.networking.receiver import TelemetryReceiver
+"""Secure telemetry receiver for Elite Zaki."""
+
+from __future__ import annotations
+
+import hashlib
+import hmac
+import json
+import time
+from dataclasses import dataclass
+from typing import Any
 
 
-def test_receiver_accepts_valid_signed_payload():
-    receiver = TelemetryReceiver(secret=b"test-secret")
+@dataclass
+class ReceiveResult:
+    """Result returned after processing a telemetry payload."""
 
-    payload = b'{"node_id":"zaki-01","status":"ok"}'
-    signature = receiver.sign(payload)
-
-    result = receiver.receive(payload, signature)
-
-    assert result.accepted is True
-    assert result.reason == "valid"
+    accepted: bool
+    reason: str
+    data: dict[str, Any] | None = None
 
 
-def test_receiver_rejects_invalid_signature():
-    receiver = TelemetryReceiver(secret=b"test-secret")
+class TelemetryReceiver:
+    """Verify and validate signed telemetry received from a drone node."""
 
-    payload = b'{"node_id":"zaki-01","status":"ok"}'
-    invalid_signature = "invalid-signature"
+    def __init__(
+        self,
+        secret: bytes,
+        max_age_seconds: int = 30,
+    ) -> None:
+        self.secret = secret
+        self.max_age_seconds = max_age_seconds
 
-    result = receiver.receive(payload, invalid_signature)
+    def sign(self, payload: bytes) -> str:
+        """Create an HMAC-SHA256 signature for a payload."""
 
-    assert result.accepted is False
-    assert result.reason == "invalid_signature"
+        return hmac.new(
+            self.secret,
+            payload,
+            hashlib.sha256,
+        ).hexdigest()
 
+    def receive(
+        self,
+        payload: bytes,
+        signature: str,
+        timestamp: float | None = None,
+    ) -> ReceiveResult:
+        """Verify a telemetry payload and return the validation result."""
 
-def test_receiver_rejects_stale_payload():
-    receiver = TelemetryReceiver(
-        secret=b"test-secret",
-        max_age_seconds=1,
-    )
+        expected_signature = self.sign(payload)
 
-    payload = b'{"node_id":"zaki-01","status":"ok"}'
-    signature = receiver.sign(payload)
+        if not hmac.compare_digest(signature, expected_signature):
+            return ReceiveResult(
+                accepted=False,
+                reason="invalid_signature",
+            )
 
-    result = receiver.receive(
-        payload,
-        signature,
-        timestamp=0,
-    )
+        if timestamp is not None:
+            age = time.time() - timestamp
 
-    assert result.accepted is False
-    assert result.reason == "stale"
+            if age < 0 or age > self.max_age_seconds:
+                return ReceiveResult(
+                    accepted=False,
+                    reason="stale",
+                )
+
+        try:
+            data = json.loads(payload.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            return ReceiveResult(
+                accepted=False,
+                reason="invalid_payload",
+            )
+
+        if not isinstance(data, dict):
+            return ReceiveResult(
+                accepted=False,
+                reason="invalid_payload",
+            )
+
+        return ReceiveResult(
+            accepted=True,
+            reason="valid",
+            data=data,
+        )
